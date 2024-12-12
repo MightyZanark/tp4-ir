@@ -170,3 +170,4 @@ cython_debug/
 # Extra
 .vscode
 .DS_Store
+dataset/mteb__*
