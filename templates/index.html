@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <form method="GET" action="/">
+        <label for="query"></label><input name="query" id="query" type="text">
+        <button type="submit">Search</button>
+        </form>
+
+        {% if result %}
+            {% for res in result %}
+                {{ res }}
+            {% endfor %}
+        {% endif %}
+    </body>
+</html>

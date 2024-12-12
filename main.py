@@ -1,10 +1,14 @@
-from flask import Flask
+from flask import Flask, render_template
+import pyterrier as pt
 
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "<h1>Hi</h1>"
+    return render_template("index.html")
 
 if __name__ == "__main__":
-    app.serve("0.0.0.0", 8080)
+    if not pt.java.started():
+        pt.java.init()
+
+    app.run("0.0.0.0", 8080)

@@ -2,3 +2,5 @@ Flask
 numpy
 pandas
 python-terrier
+datasets
+sentence-transformers
