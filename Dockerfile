@@ -8,7 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 RUN apt-get update && apt-get -y upgrade
-RUN apt-get install -y openjdk-11-jre-headless openjdk-11-jdk-headless
+RUN apt-get install -y openjdk-17-jre-headless openjdk-17-jdk-headless
 RUN apt-get clean
 RUN pip install -r requirements.txt
 RUN pip install --upgrade git+https://github.com/terrierteam/pyterrier_t5.git -q
