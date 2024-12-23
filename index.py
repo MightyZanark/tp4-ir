@@ -13,7 +13,7 @@ def start_indexing(collections: pd.DataFrame, index_name: str = "./dataset/index
     print("Start indexing...")
     indexer = pt.IterDictIndexer(
         index_name, 
-        meta={"docno": 8, "title": 256, "text": (1<<15)}, 
+        meta={"docno": 8, "title": 256, "text": (1<<15), "content": (1<<15)}, 
         overwrite=True
     )
     indexer.index(collections.to_dict(orient="records"))
@@ -33,10 +33,12 @@ if __name__ == "__main__":
     
     ds = load_dataset("mteb/cqadupstack-programmers", "corpus", cache_dir="./dataset")
     ds = ds["corpus"].to_pandas()
+
     ds = ds.rename(columns={"_id": "docno"})
+    ds['content'] = ds['title'] + ' ' + ds['text']
     # print(ds["docno"].str.len().max())
     # print(ds["title"].str.len().max())
     # print(ds["text"].str.len().max())
-    start_indexing(ds)
+    start_indexing(ds, "dataset/index_windows")
     # indexref = get_index()
     # print(pt.IndexFactory.of(indexref).getMetaIndex())
