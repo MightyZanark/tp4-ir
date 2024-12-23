@@ -23,4 +23,5 @@ if __name__ == "__main__":
         pt.java.init()
 
     debug = not os.getenv("PRODUCTION", False)
-    app.run("0.0.0.0", 8080, debug=debug)
+    port = 8080 if debug else 80
+    app.run("0.0.0.0", port, debug=debug)
