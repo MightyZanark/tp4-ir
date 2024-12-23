@@ -4,3 +4,4 @@ pandas
 python-terrier
 datasets
 sentence-transformers
+nltk
