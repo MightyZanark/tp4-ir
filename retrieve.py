@@ -8,11 +8,10 @@ import pyterrier as pt
 from nltk.corpus import stopwords
 from sentence_transformers import CrossEncoder
 
-from index import get_index
-
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 NONALNUM = re.compile("[\W_ ]+")
+
 
 def remove_nonalnum(text: str) -> str:
     return NONALNUM.sub(' ', text)
@@ -60,6 +59,7 @@ def rerank_serp(query: str, serp: pd.DataFrame, reranker_loc: str = "./model/cro
     reranked = serp.sort_values(by="score", ascending=False)
 
     return reranked
+
 
 if __name__ == "__main__":
     if not pt.java.started():

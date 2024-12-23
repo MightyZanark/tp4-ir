@@ -8,6 +8,7 @@ from datasets import load_dataset
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 
+
 def start_indexing(
         collections: pd.DataFrame,
         index_name: str = "./dataset/index",
@@ -29,6 +30,17 @@ def get_index(index_path: str = "./dataset/index/data.properties") -> pt.IndexRe
     if not os.path.exists(index_path):
         raise RuntimeError(f"The path '{index_path}' is incorrect or the index have not been made")
     return pt.IndexRef.of(index_path)
+
+
+def init():
+    cache_dir = os.path.abspath(os.path.join(CUR_DIR, "./dataset"))
+    ds = load_dataset("mteb/cqadupstack-programmers", "corpus", cache_dir=cache_dir)
+    ds = ds["corpus"].to_pandas()
+    ds = ds.rename(columns={"_id": "docno"})
+    ds['content'] = ds['title'] + ' ' + ds['text']
+
+    meta = {"docno": 8, "title": 256, "text": (1<<15), "content": (1<<15)}
+    start_indexing(ds, meta=meta)
 
 
 if __name__ == "__main__":

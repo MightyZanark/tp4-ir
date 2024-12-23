@@ -2,11 +2,10 @@ import os
 import pickle
 from typing import Any
 
-import pandas as pd
 import pyterrier as pt
+from sentence_transformers import CrossEncoder
 
 from index import get_index
-from sentence_transformers import CrossEncoder
 
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -45,6 +44,12 @@ def get_cross_encoder(
         save_model(cross_enc, save_loc)
     print("Grabbed CrossEncoder model!")
     return cross_enc
+
+
+def init():
+    indexref = get_index()
+    get_bm25(indexref)
+    get_cross_encoder()
 
 
 if __name__ == "__main__":
