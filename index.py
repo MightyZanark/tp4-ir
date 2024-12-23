@@ -6,7 +6,10 @@ import pyterrier as pt
 from datasets import load_dataset
 
 
+CUR_DIR = os.path.dirname(os.path.realpath(__file__))
+
 def start_indexing(collections: pd.DataFrame, index_name: str = "./dataset/index"):
+    index_name = os.path.join(CUR_DIR, index_name)
     print("Start indexing...")
     indexer = pt.IterDictIndexer(
         index_name, 
@@ -18,6 +21,7 @@ def start_indexing(collections: pd.DataFrame, index_name: str = "./dataset/index
 
 
 def get_index(index_path: str = "./dataset/index/data.properties"):
+    index_path = os.path.join(CUR_DIR, index_path)
     if not os.path.exists(index_path):
         raise RuntimeError("The index_path is incorrect of the index have not been made")
     return pt.IndexRef.of(index_path)
