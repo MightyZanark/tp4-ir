@@ -1,9 +1,9 @@
 import os
 import pickle
+from typing import Any
 
 import pandas as pd
 import pyterrier as pt
-from datasets import load_dataset
 
 from index import get_index
 from sentence_transformers import CrossEncoder
@@ -11,36 +11,48 @@ from sentence_transformers import CrossEncoder
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 
-def get_bm25(indexref: pt.IndexRef, save: bool = True, save_loc: str = "./model/bm25.pkl"):
+def save_model(model: Any, save_loc: str):
+    if not os.path.isabs(save_loc):
+        save_loc = os.path.abspath(os.path.join(CUR_DIR, save_loc))
+    
+    print(f"Saving model {model.__class__.__name__} to {save_loc}")
+    with open(save_loc, "wb") as f:
+        pickle.dump(model, f)
+
+
+def get_bm25(
+        indexref: pt.IndexRef,
+        metadata: list[str] = ["docno", "title", "text", "content"],
+        save: bool = True,
+        save_loc: str = "./model/bm25.pkl"
+    ) -> pt.terrier.Retriever:
     print("Getting BM25 retriever...")
-    save_loc = os.path.join(CUR_DIR, save_loc)
-    bm25 = pt.terrier.Retriever(indexref, wmodel="BM25", metadata=["docno", "content"])
+    bm25 = pt.terrier.Retriever(indexref, wmodel="BM25", metadata=metadata)
     if save:
-        print(f"Saving BM25 to {save_loc}")
-        with open(save_loc, "wb") as f:
-            pickle.dump(bm25, f)
+        save_model(bm25, save_loc)
     print("Grabbed BM25 retriever!")
     return bm25
 
-def rerank_cross_encoder(query: str, candidates: pd.DataFrame, model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2", top_k: int = 30):
-    print(f"Loading CrossEncoder model: {model_name}")
-    cross_encoder = CrossEncoder(model_name)
 
-    query_doc_pairs = [(query, doc) for doc in candidates["content"]]
-
-    print("Scoring documents with the CrossEncoder...")
-    scores = cross_encoder.predict(query_doc_pairs)
-
-    candidates["score"] = scores
-
-    reranked_candidates = candidates.sort_values(by="score", ascending=False).head(top_k)
-
-    return reranked_candidates[["content", "score"]].values.tolist()
+def get_cross_encoder(
+        model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2",
+        save: bool = True,
+        save_loc: str = "./model/crossenc.pkl"
+    ) -> CrossEncoder:
+    print(f"Getting CrossEncoder with model {model_name}")
+    cross_enc = CrossEncoder(model_name)
+    if save:
+        save_model(cross_enc, save_loc)
+    print("Grabbed CrossEncoder model!")
+    return cross_enc
 
 
 if __name__ == "__main__":
     if not pt.java.started():
         pt.java.init()
     
-    indexref = get_index(r"C:\Users\ASUSTeK\Documents\Fasilkom\SEM 5\TBI\TP\TP4\TEPEE4\tp4-ir\./dataset/index/data_1.properties")
-    get_bm25(indexref)
+    # indexref = get_index(r"C:\Users\ASUSTeK\Documents\Fasilkom\SEM 5\TBI\TP\TP4\TEPEE4\tp4-ir\./dataset/index/data_1.properties"
+    indexref = get_index()
+    bm25 = get_bm25(indexref)
+    crossenc = get_cross_encoder()
+    print(crossenc)

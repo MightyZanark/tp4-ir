@@ -12,7 +12,7 @@ def start_indexing(
         collections: pd.DataFrame,
         index_name: str = "./dataset/index",
         meta: dict[str, int] = {"docno": 8, "title": 256, "text": (1<<15)}
-    ):
+    ) -> None:
     if not os.path.isabs(index_name):
         index_name = os.path.abspath(os.path.join(CUR_DIR, index_name))
     
@@ -22,7 +22,7 @@ def start_indexing(
     print(f"Indexing finished! Saved at {index_name}")
 
 
-def get_index(index_path: str = "./dataset/index/data.properties"):
+def get_index(index_path: str = "./dataset/index/data.properties") -> pt.IndexRef:
     if not os.path.isabs(index_path):
         index_path = os.path.abspath(os.path.join(CUR_DIR, index_path))
 

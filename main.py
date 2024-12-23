@@ -1,14 +1,26 @@
-from flask import Flask, render_template
+import os
+
 import pyterrier as pt
+from flask import Flask, render_template, request
+
+from retrieve import get_model, get_serp
+
 
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    query = request.args.get("query")
+    if query is None:
+        return render_template("index.html")
+    
+    serp = get_serp(get_model(), query)
+    serp = serp[["title", "text"]].to_dict(orient="records")
+    return render_template("index.html", result=serp)
 
 if __name__ == "__main__":
     if not pt.java.started():
         pt.java.init()
 
-    app.run("0.0.0.0", 8080)
+    debug = not os.getenv("PRODUCTION", False)
+    app.run("0.0.0.0", 8080, debug=debug)

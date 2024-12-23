@@ -4,6 +4,9 @@ WORKDIR /app
 
 COPY . /app
 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
 RUN apt-get update && apt-get -y upgrade
 RUN apt-get install -y openjdk-11-jre-headless openjdk-11-jdk-headless
 RUN apt-get clean

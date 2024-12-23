@@ -10,9 +10,18 @@
         </form>
 
         {% if result %}
+        <table>
+            <tr>
+                <th>Title</th>
+                <th>Text</th>
+            </tr>
             {% for res in result %}
-                {{ res }}
+            <tr>
+                <td>{{ res.title }}</td>
+                <td>{{ res.text }}</td>
+            </tr>
             {% endfor %}
+        </table>
         {% endif %}
     </body>
 </html>
