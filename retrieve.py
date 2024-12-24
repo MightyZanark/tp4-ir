@@ -88,7 +88,10 @@ def rerank_serp(query: str, serp: pd.DataFrame, reranker_loc: str = "./model/cro
 
     print("Scoring results with the CrossEncoder...")
     query_doc_pairs = [(query, f"{row['title']} {row['text']}") for _, row in serp.iterrows()]
-    scores = cross_encoder.predict(query_doc_pairs)
+    try:
+        scores = cross_encoder.predict(query_doc_pairs)
+    except: 
+        return serp
 
     serp["score"] = scores
     reranked = serp.sort_values(by="score", ascending=False)
