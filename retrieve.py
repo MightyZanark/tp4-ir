@@ -28,7 +28,14 @@ def get_model(model_loc: str = "./model/bm25.pkl") -> pt.terrier.Retriever | Cro
         return pickle.load(f)
 
 
-def get_serp(model: pt.terrier.Retriever, query: str, k: int = 30, rerank: bool = True):
+def get_serp(
+    model: pt.terrier.Retriever, 
+    query: str, 
+    k: int = 30, 
+    rerank: bool = True, 
+    title_weight: float = 0.7, 
+    text_weight: float = 0.3
+):
     query = remove_nonalnum(query)
     stemmer = pt.TerrierStemmer.porter
     query = [stemmer.stem(word) for word in query.split()]
@@ -40,11 +47,39 @@ def get_serp(model: pt.terrier.Retriever, query: str, k: int = 30, rerank: bool 
     stw = set(stw)
     query = ' '.join([word for word in query if word not in stw])
 
-    serp = (model % k).search(query)
-    if not rerank:
-        return serp
+    # Separate retrieval for titles and text
+    bm25_title = pt.BatchRetrieve(model.indexref, wmodel="BM25", metadata=["docno", "title"], num_results=k)
+    bm25_text = pt.BatchRetrieve(model.indexref, wmodel="BM25", metadata=["docno", "text"], num_results=k)
 
-    return rerank_serp(query, serp)
+    # Retrieve results
+    results_title = bm25_title.search(query)
+    results_text = bm25_text.search(query)
+
+    # Combine scores with weights
+    results_title["score"] = (results_title["score"] - results_title["score"].min()) / (results_title["score"].max() - results_title["score"].min())
+    results_text["score"] = (results_text["score"] - results_text["score"].min()) / (results_text["score"].max() - results_text["score"].min())
+
+    results_title["score"] *= title_weight
+    results_text["score"] *= text_weight
+
+    combined_serp = pd.concat([results_title, results_text])
+
+    # Ensure 'docno' exists for grouping
+    if "docno" not in combined_serp.columns:
+        raise KeyError("'docno' column is missing in the retrieved results. Check your metadata configuration.")
+
+    combined_serp = combined_serp.groupby("docno").agg({
+        "title": "first",
+        "text": "first",
+        "score": "sum"
+    }).reset_index()
+
+    combined_serp = combined_serp.sort_values(by="score", ascending=False)
+
+    if not rerank:
+        return combined_serp
+
+    return rerank_serp(query, combined_serp)
 
 
 def rerank_serp(query: str, serp: pd.DataFrame, reranker_loc: str = "./model/crossenc.pkl"):
@@ -52,7 +87,7 @@ def rerank_serp(query: str, serp: pd.DataFrame, reranker_loc: str = "./model/cro
     cross_encoder = get_model(reranker_loc)
 
     print("Scoring results with the CrossEncoder...")
-    query_doc_pairs = [(query, doc) for doc in serp["content"]]
+    query_doc_pairs = [(query, f"{row['title']} {row['text']}") for _, row in serp.iterrows()]
     scores = cross_encoder.predict(query_doc_pairs)
 
     serp["score"] = scores
@@ -70,7 +105,7 @@ if __name__ == "__main__":
 
     query = "is python bad?"
     print(f"Retrieving SERP for query: {query}")
-    serp = get_serp(model, query)
+    serp = get_serp(model, query, title_weight=2.0, text_weight=1.0)
     serp = serp[["title", "text", "score"]].to_dict(orient="records")
 
     # print("Reranking SERP with cross-encoder...")

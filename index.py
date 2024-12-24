@@ -12,6 +12,7 @@ CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 def start_indexing(
         collections: pd.DataFrame,
         index_name: str = "./dataset/index",
+        # index_name: str = "./dataset/index_windows",
         meta: dict[str, int] = {"docno": 8, "title": 256, "text": (1<<15)}
     ) -> None:
     if not os.path.isabs(index_name):

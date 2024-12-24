@@ -56,7 +56,7 @@ if __name__ == "__main__":
     if not pt.java.started():
         pt.java.init()
     
-    # indexref = get_index(r"C:\Users\ASUSTeK\Documents\Fasilkom\SEM 5\TBI\TP\TP4\TEPEE4\tp4-ir\./dataset/index/data_1.properties"
+    # indexref = get_index(r"C:\Users\ASUSTeK\Documents\Fasilkom\SEM 5\TBI\TP\TP4\TEPE4LAGI\tp4-ir\dataset\index_windows\data.properties")
     indexref = get_index()
     bm25 = get_bm25(indexref)
     crossenc = get_cross_encoder()

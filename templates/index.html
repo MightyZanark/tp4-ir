@@ -2,26 +2,85 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f9f9f9;
+                color: #333;
+                margin: 0;
+                padding: 20px;
+            }
+            form {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+            input[type="text"] {
+                width: 300px;
+                padding: 10px;
+                border: 2px solid #ccc;
+                border-radius: 5px;
+                font-size: 16px;
+            }
+            button {
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-left: 10px;
+            }
+            button:hover {
+                background-color: #45a049;
+            }
+            .content-box {
+                background: #ffffff;
+                border: 1px solid #ddd;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            .result-item {
+                margin-bottom: 20px;
+                padding: 15px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                background-color: #fefefe;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .title {
+                font-size: 18px;
+                font-weight: bold;
+                color: #4CAF50;
+                margin-bottom: 10px;
+            }
+            .text {
+                font-size: 16px;
+                color: #555;
+            }
+        </style>
     </head>
     <body>
-        <form method="GET" action="/">
-        <label for="query"></label><input name="query" id="query" type="text">
-        <button type="submit">Search</button>
-        </form>
+        <div class="content-box">
+            <form method="GET" action="/">
+                <label for="query" style="font-weight: bold; margin-right: 10px;">Search:</label>
+                <input name="query" id="query" type="text" placeholder="Enter your query">
+                <button type="submit">Search</button>
+            </form>
+        </div>
 
         {% if result %}
-        <table>
-            <tr>
-                <th>Title</th>
-                <th>Text</th>
-            </tr>
+        <div class="content-box">
             {% for res in result %}
-            <tr>
-                <td>{{ res.title }}</td>
-                <td>{{ res.text }}</td>
-            </tr>
+            <div class="result-item">
+                <div class="title">{{ res.title }}</div>
+                <div class="text">{{ res.text }}</div>
+            </div>
             {% endfor %}
-        </table>
+        </div>
         {% endif %}
     </body>
 </html>
