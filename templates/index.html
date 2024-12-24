@@ -10,6 +10,19 @@
                 margin: 0;
                 padding: 20px;
             }
+            .home-link {
+                font-size: 24px;
+                font-weight: bold;
+                color: #4CAF50;
+                text-decoration: none;
+                display: block;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+            .home-link:hover {
+                text-decoration: underline;
+                color: #45a049;
+            }
             form {
                 display: flex;
                 justify-content: center;
@@ -64,6 +77,9 @@
         </style>
     </head>
     <body>
+        <!-- Home Link -->
+        <a href="/" class="home-link">StackUnderFlow</a>
+
         <div class="content-box">
             <form method="GET" action="/">
                 <label for="query" style="font-weight: bold; margin-right: 10px;">Search:</label>
