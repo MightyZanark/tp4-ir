@@ -5,10 +5,12 @@ on:
     branches: [ main, master ]
     paths-ignore:
         - '**.md'
+        - 'experiment.py'
   pull_request:
     branches: [ main, master ]
     paths-ignore:
         - '**.md'
+        - 'experiment.py'
 
 jobs:
   build-and-push:

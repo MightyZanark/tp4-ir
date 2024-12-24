@@ -25,28 +25,33 @@ if __name__ == "__main__":
         pt.java.init()
     
     cache_dir = os.path.abspath(os.path.join(CUR_DIR, "./dataset"))
-    ds = load_dataset("mteb/cqadupstack-programmers", "default", cache_dir=cache_dir)
-    ds = ds["test"].to_pandas()
-    ds = ds.rename(columns={"query-id": "qid", "corpus-id": "docno", "score": "label"})
-    ds["label"] = ds["label"].astype(int)
 
-    ds_queries = load_dataset("mteb/cqadupstack-programmers", "queries", cache_dir=cache_dir)
-    ds_queries = ds_queries["queries"].to_pandas()
-    ds_queries = ds_queries.rename(columns={"_id": "qid", "text": "query"})
-    ds_queries["query"] = ds_queries["query"].apply(remove_nonalnum)
+    df_qrels = load_dataset("mteb/cqadupstack-programmers", "default", cache_dir=cache_dir)
+    df_qrels = df_qrels["test"].to_pandas()
+    df_qrels = df_qrels.rename(columns={"query-id": "qid", "corpus-id": "docno", "score": "label"})
+    df_qrels["label"] = df_qrels["label"].astype(int)
+
+    df_queries = load_dataset("mteb/cqadupstack-programmers", "queries", cache_dir=cache_dir)
+    df_queries = df_queries["queries"].to_pandas()
+    df_queries = df_queries.rename(columns={"_id": "qid", "text": "query"})
+    df_queries["query"] = df_queries["query"].apply(remove_nonalnum)
+    
+    test_queries = df_queries[:50].copy()
+    test_qrels = df_qrels[df_qrels["qid"].isin(test_queries["qid"])]
 
     # BM25 model
     indexref = get_index()
     bm25_model = get_model()
-    cross_encT = pt.apply.doc_score(_crossencoder_apply, batch_size=128)
-    bm25_crossencoder = (bm25_model % CUT_OFF) >> pt.text.get_text(get_index(
-        r"C:\Users\ASUSTeK\Documents\Fasilkom\SEM 5\TBI\TP\TP4\TEPE4LAGI\tp4-ir\dataset\index_windows\data.properties"),
-        ["content"]) >> cross_encT
+    cross_encT = pt.apply.doc_score(_crossencoder_apply, batch_size=4096)
+    # indexref = get_index(r"C:\Users\ASUSTeK\Documents\Fasilkom\SEM 5\TBI\TP\TP4\TEPE4LAGI\tp4-ir\dataset\index_windows\data.properties")
+    indexref = get_index()
+    bm25_crossencoder = (bm25_model % CUT_OFF) >> pt.text.get_text(indexref, ["content"]) >> cross_encT
     
     eval_results = pt.Experiment([bm25_model, bm25_crossencoder], \
-                            ds_queries, \
-                            ds, \
+                            test_queries, \
+                            test_qrels, \
                             eval_metrics=[P@5, "map", nDCG@5], \
-                            names=["BM25", "BM25 >> Bi-encoder"], \
+                            names=["BM25", "BM25 >> Cross-encoder"], \
                             baseline=0) # statistical significance test
+    print(eval_results)
 
